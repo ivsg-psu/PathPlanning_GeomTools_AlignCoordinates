@@ -16,7 +16,19 @@ This repo supports regression-based methods that align one cartesian coordinate 
 </p>
 
 <p align="left">
-    This AlignCoordinates code library hosts functions to perform regression fitting of one coordinate system to another.
+    This AlignCoordinates code library hosts functions to perform regression fitting of one coordinate system to another. In the 2D case, we choose homogenous coordinates of the form below which includes translation via $(tx, ty)$, rotation by angle ($q$), and uniform scaling of the axes ($S$):
+
+```Matlab
+% translation via (tx, ty), rotation by angle (q), and uniform scaling of
+% the axes (S):
+%
+% X' = [S*cos(q)  -sin(q)   tx ] * | x | 
+% Y' = [sin(q)   S*cos(q)   ty ]   | y |
+% 1  = [0            0      1  ]   | 1 |
+% 
+% This has 4 parameters, and thus can be fit with minimum 2 points 
+```
+
 </p>
 
 <!-- TABLE OF CONTENTS -->
