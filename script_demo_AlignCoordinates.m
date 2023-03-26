@@ -136,75 +136,62 @@ if ~exist('flag_AlignCoords_Folders_Initialized','var')
     
 end
 
-%% Create a set of test situations
-% 1) Exact match
-% 2) Noisy but exact match
-% 3) Very noisy match
 
 % We choose homogenous coordinates of the form below which includes:
 % translation via (tx, ty), rotation by angle (q), and uniform scaling of
 % the axes (S):
 %
-% X' = [S*cos(q)  -sin(q)   tx ] * | x | 
-% Y' = [sin(q)   S*cos(q)   ty ]   | y |
-% 1  = [0             0      1  ]   | 1 |
+% X' = [S*cos(q)  -S*sin(q)   tx ] * | x | 
+% Y' = [S*sin(q)   S*cos(q)   ty ]   | y |
+% 1  = [0             0       1  ]   | 1 |
+
+
+
+%% Demonstrate fcn_AlignCoords_generate2DTransformMatrix
+% Fills in transformation matricies, and can demonstrate the transform on
+% sample sets of points
+
+fig_num = 1;
 
 % Fill in a sample transform matrix
 S = 2;
-rotation_angle = 70*pi/180;
 tx = 2;
 ty = 7;
-Tscale = [...
-         S                   0                 0; 
-         0                   S                 0; 
-         0                   0                 1 
-    ];
-Trotate = [...
-     cos(rotation_angle)  -sin(rotation_angle) 0; 
-      sin(rotation_angle)  cos(rotation_angle) 0; 
-         0                   0                 1 
-    ];
+theta = -40*pi/180;
 
-Ttranslate = [...
-         1                   0                 tx; 
-         0                   1                 ty; 
-         0                   0                 1 
-    ];
+order_string = 'RTS';
+T = fcn_AlignCoords_generate2DTransformMatrix( ...
+    S, theta, tx, ty, order_string, fig_num);
+title('Demonstration of fcn_AlignCoords_fillSamplePoints', 'Interpreter', 'none');
 
-Tsrt = Tscale*Trotate*Ttranslate;
-Trts = Trotate*Ttranslate*Tscale;
-T = Trts;
-%T = Tsrt;
+%% Demonstrate fcn_AlignCoords_fillSamplePoints
+% Fills in some sample points, in homogenous form
+fig_num = 2;
+figure(fig_num);
+clf;
 
-% Fill in some sample points, in homogenous form
+for type_of_points = 1:4
+    subplot(2,2,type_of_points);
+    start_points = fcn_AlignCoords_fillSamplePoints(type_of_points, fig_num);
+end
+sgtitle('Demonstration of fcn_AlignCoords_generate2DTransformMatrix', 'Interpreter', 'none','FontSize',12);
 
-% % Calculate the square
-% start_points = [0 0; 2 0; 2 2; 0 2];
 
-% Calculate the weird polygon
-Npoints = 7;
-temp_point_spacing = rand(Npoints+1,1);
-temp_cum_sum = cumsum(temp_point_spacing);
-normalized_temp_cum_sum = temp_cum_sum/temp_cum_sum(end);
-normalized_temp_cum_sum = normalized_temp_cum_sum(1:end-1);
-angles = 2*pi*normalized_temp_cum_sum;
-radii = 4+rand(Npoints,1);
-start_points = [radii.*cos(angles) radii.*sin(angles)]+ones(Npoints,1)*[6 6];
+%% Ccreate test points used for all functions that follow
+start_points = fcn_AlignCoords_fillSamplePoints;
+moved_points = (T*start_points')';
 
-% Close off the polygon
-start_points = [start_points;start_points(1,:)];
+noise_level = 0.1;
+noise_to_points = [noise_level*randn(length(start_points(:,1)),2) ones(length(start_points(:,1)),1)];
 
-% Add coordinate axes lines?
-% start_points = [start_points;nan(1,2);[0 0; 2 0]; nan(1,2); [0 0; 0 2]];
+coord_base_points = start_points;
+coord_xform_points = moved_points + noise_to_points;
 
-% Convert to nomralized form
-normalized_start_points = [start_points ones(length(start_points(:,1)),1)];
-
-% Apply the transform
-moved_points = (T*normalized_start_points')';
+%% Show how to apply the transform
+moved_points = (T*start_points')';
 
 % Plot the results
-fig_num = 2384;
+fig_num = 3;
 figure(fig_num);
 clf;
 hold on;
@@ -219,67 +206,145 @@ end
 plot(start_points(:,1),start_points(:,2),'r.-','MarkerSize',10,'LineWidth',5);
 plot(moved_points(:,1),moved_points(:,2),'b.-','MarkerSize',10,'LineWidth',5);
 
-%% Set up solution for finding the scale factor
-coord_base_points = start_points;
-coord_xform_points = moved_points;
+title('Demonstration of applying transforms to homogenous points');
 
-% Find index pairs 
-% These are the combinations of all point indicies that are unique
-index_pairs = nchoosek(1:Npoints,2);
+%% Demonstrate fcn_AlignCoords_regressionFitScaleFactor
+% Shows function for finding the scale factor
+fig_num = 4;
+S_calculated = fcn_AlignCoords_regressionFitScaleFactor(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num);
+sgtitle('Demonstration of fcn_AlignCoords_regressionFitScaleFactor', 'Interpreter', 'none','FontSize',12);
 
-% Find distances
-coord_base_values_squared = (coord_base_points(index_pairs(:,1),:) - coord_base_points(index_pairs(:,2),:)).^2;
-coord_base_distances_squared = sum(coord_base_values_squared,2);
+fprintf(1,'Using fcn_AlignCoords_regressionFitScaleFactor:\n');
+fprintf(1,'Results of fitting scale factor, S:\n');
+fprintf(1,'S true: \n');
+disp(S);
 
-coord_xform_values_squared = (coord_xform_points(index_pairs(:,1),:) - coord_xform_points(index_pairs(:,2),:)).^2;
-coord_xform_distances_squared = sum(coord_xform_values_squared,2);
+fprintf(1,'S calculated: \n');
+disp(S_calculated);
 
-% Perform regression to find scaling
-% This is of form y = x*M
-% with y being Nx1 vector, x being Nx1 vector, M is 1x1 scaling parameter
-% (S^2)
-y = coord_base_distances_squared.^0.5;
-x = coord_xform_distances_squared.^0.5;
-M = (y'*x)\(y'*y);
-S = 1/M;
-fprintf(1,'Scale is: %.2f\n',S);
+%% Demonstrate fcn_AlignCoords_fitRotationKabsch
+% Show solution for finding the rotation and translation
 
-%% Set up solution for finding the rotation
+fig_num = 5;
 
-% Find start and end points
-starting_edges = coord_base_points(index_pairs(:,1));
-ending_edges = coord_base_points(index_pairs(:,2));
+% NOTE: this function can work in hyperdimensions or even 1D, so we have to
+% carefully specify to only use the 2 columns
+[R_calculated,t_rotated,err] = fcn_AlignCoords_fitRotationKabsch(coord_base_points(:,1:2), coord_xform_points(:,1:2),fig_num); % Find optimal transform
+sgtitle('Demonstration of fcn_AlignCoords_fitRotationKabsch', 'Interpreter', 'none','FontSize',12);
 
-URHERE
+% Calculate unrotated version of t, and in column form. Note: it's in the
+% negative direction because the fitting method is from moved to base.
+t_calculated = -t_rotated/R_calculated;
 
-%% Perform regression to find scaling
-% This is of form y = x*M
-% with y being Nx1 vector, x being Nx1 vector, M is 1x1 scaling parameter
-% (S^2)
-y = coord_base_distances_squared.^0.5;
-x = coord_xform_distances_squared.^0.5;
-M = (y'*x)\(y'*y);
-S = 1/M;
-fprintf(1,'Scale is: %.2f\n',S);
+fprintf(1,'Using fcn_AlignCoords_fitRotationKabsch:\n');
+fprintf(1,'Results of fitting rotation matrix, R:\n');
+fprintf(1,'R true: \n');
+disp(R);
 
+fprintf(1,'R calculated: \n');
+disp(R_calculated);
+
+fprintf(1,'Results of fitting translation vector, t:\n');
+fprintf(1,'t true: \n');
+disp(t);
+fprintf(1,'t calculated: \n');
+disp(t_calculated);
+
+fprintf(1,'Resulting errors:\n');
+disp(err);
+
+
+%
+% fig_num = 6;
+% figure(fig_num);
+% clf;
+% 
+% hold on;
+
+% P3 = bsxfun(@plus,coord_xform_points*R_calculated,t_rotated);
+% plot(coord_xform_points(:,1),coord_xform_points(:,2),'r.-','LineWidth',3,'MarkerSize',20);
+% plot(coord_base_points(:,1),coord_base_points(:,2),'b.-','LineWidth',3,'MarkerSize',20);
+% plot(P3(:,1),P3(:,2),'ko-','LineWidth',3,'MarkerSize',10);
+% 
+% axis equal;
+% grid on;
+% legend('Moved points','Target points','Moved points Transformed');
+% m = 2;
+% Npoints = length(coord_base_points(:,1));
+% title([int2str(m) ' dimensions, ' int2str(Npoints) ' points, Maximum RMSE: ' ...
+%     num2str(max(err),6)]);
+
+
+%% Demonstrate fcn_AlignCoords_fit2DCoordinates
+% Solution for generic 2D coordinate matching (scaling, rotation, and
+% translation)
+
+fig_num = 7;
+[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+sgtitle('Demonstration of fcn_AlignCoords_fit2DCoordinates', 'Interpreter', 'none','FontSize',12);
+
+
+fprintf(1,'Using fcn_AlignCoords_fit2DCoordinates:\n');
+fprintf(1,'Results of fitting entire transform matrix, T:\n');
+fprintf(1,'T true: \n');
+disp(T);
+fprintf(1,'T calculated: \n');
+disp(T_calculated);
+
+if 1 == 0 % The following assertions should work if the noise above is removed.
+    % Is the error small?
+    assert(max(err,[],'all')<1E-10);
+    
+    % Does the T matrix match?
+    assert(max(T_calculated-T,[],'all')<1E-10, 'Transformation matrix, T, did not match');
+    
+    % Does the scaling match?
+    assert(max(S_calculated-S,[],'all')<1E-10, 'Scaling, S, did not match');
+    
+    % Does the rotation match?
+    assert(max(R_calculated-T(1:2,1:2)/S,[],'all')<1E-10, 'Rotation matrix, R, did not match');
+    
+    % Does the translation match?
+    assert(max(t_calculated-T(1:2,3)/S,[],'all')<1E-10, 'translation did not match');
+end
+
+maxerr_2D = max(err,[],'all');
 
 
 %% Generic affine transform 
-% This has 4 parameters, and thus can be fit with minimum 2 points
+% Show that the affine transform works, but it's not a pure rotation
 
 
-
-% Note that the translation of ortho coordinates from one frame to another
-% is a special case of the affine tranformation
-% X' = [M11  M12  M13] * | x | 
-% Y' = [M21  M22  M23]   | y |
-% 1  = [0     0    1 ]   | 1 |
-% But note that the rotation-translation-scaling transform requires 3 points to fully fit,
-% whereas the translation-rotation-scaling only requires 2!
+maxerr_affine = max(err,[],'all');
 
 
+%% Put 2D and affine side-by-side
+fig_num = 9;
+figure(fig_num);
+clf
+hold on
 
+subplot(1,2,1);
+grid on;
+axis equal;
+[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+title(sprintf('2D xform, max error: %s',num2str(maxerr_2D,6)));
 
+subplot(1,2,2);
+grid on;
+hold on;
+axis equal;
+
+plot(coord_xform_points(:,1),coord_xform_points(:,2),'r.-','LineWidth',3,'MarkerSize',20);
+plot(coord_base_points(:,1),coord_base_points(:,2),'b.-','LineWidth',5,'MarkerSize',30);
+plot(fixed_points(:,1),fixed_points(:,2),'go-','LineWidth',3,'MarkerSize',15);
+
+legend('Moved points','Target points','Moved points, Transformed');
+m = 2;
+Npoints = length(coord_base_points(:,1));
+title(sprintf('Affine xform, max error: %s',num2str(maxerr_affine,6)));
+
+sgtitle('Comparison of 2D and Affine transforms', 'Interpreter', 'none');
 
 
 function fcn_INTERNAL_DebugTools_installDependencies(dependency_name, dependency_subfolders, dependency_url, varargin)
