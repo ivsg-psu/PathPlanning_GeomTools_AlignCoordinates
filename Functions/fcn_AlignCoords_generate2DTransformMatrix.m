@@ -3,6 +3,70 @@ function T = ...
     S, theta, tx, ty, order_string, varargin)
 % fcn_AlignCoords_generate2DTransformMatrix
 % fills in a transform matrix given scaling, angle, and translation values.
+% It uses the homogenous form of the transformation in 2D, allowing for
+% scaling, rotation, and translation given by:
+%
+% Tscale = [...
+%          S                   0                 0; 
+%          0                   S                 0; 
+%          0                   0                 1 
+%     ];
+% 
+% 
+% Trotate = [...
+%      cos(theta)  -sin(theta) 0; 
+%       sin(theta)  cos(theta) 0; 
+%          0         0         1 
+%     ];
+% 
+% Ttranslate = [...
+%          1                   0                 tx; 
+%          0                   1                 ty; 
+%          0                   0                 1 
+%     ];
+%
+% The transformation of homogenous from one coordinate system to another is
+% achieved by: moved_point = (T*start_spoints')' if the start points are
+% Nx3, or by moved_point = (T*start_spoints) if the start points are 3xN.
+% 
+% The inverse transformation can be found by the pseudo-inverse: 
+% inverse_points = (T\normalized_coord_xform_points')';
+%
+% For example, assume that coord_base_points is filled with data with N
+% rows and 2 columns. The following code demonstrates creation of a
+% transform, moving points, then using the pseudo-inverse tranformation to
+% move them back:
+%
+%         figure; % Set up a new figure
+%         hold on; % Hold the plots
+%         
+%         % Define a transformation
+%         S = 2;
+%         theta = 45*pi/180;
+%         tx = 3;
+%         ty = 7;
+%         order_string = 'tsr';
+%         T = fcn_AlignCoords_generate2DTransformMatrix(S, theta, tx, ty, order_string);
+%         
+%         Npoints = 10; % How many points should we demo with?
+%         coord_base_points = rand(Npoints,2); % Set up some test points
+%         plot(coord_base_points(:,1),coord_base_points(:,2),'b.','Markersize',10); % Plot the result
+%         
+%         % Convert to homogenous form in prep for transform
+%         colOfOne = ones(Npoints,1); % Define column of 1's
+%         normalized_coord_base_points = [coord_base_points(:,1:2) colOfOne];  % Make homogenous
+%         normalized_coord_xform_points = (T*normalized_coord_base_points')';
+%         
+%         % Plot the results
+%         plot(normalized_coord_xform_points(:,1),normalized_coord_xform_points(:,2),'r.','Markersize',10); % Plot the result
+%         
+%         % Invert them back
+%         moved_back_points = (T\normalized_coord_xform_points')';
+%         
+%         % Plot the results, and show that the moved back points, given by green
+%         % circles, land back at the original points, shown in blue
+%         plot(moved_back_points(:,1),moved_back_points(:,2),'go','Markersize',10); % Plot the result
+%
 % 
 % FORMAT:
 % 

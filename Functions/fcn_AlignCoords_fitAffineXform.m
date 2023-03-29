@@ -2,7 +2,54 @@ function [T,err] = ...
     fcn_AlignCoords_fitAffineXform(coord_base_points, coord_xform_points, varargin)
 % fcn_AlignCoords_fitAffineXform
 % performs regression fitting to find the affine transform that matches
-% one point set another. 
+% one point set another. The affine transform is not technically a
+% coordinate rotatin, but can be any transformation of points in homogenous
+% form. Specifically, the 2-D corodinate transform of ortho coordinates
+% from one frame to another with scale S, rotation theta, and translations
+% tx and ty, given by:
+%
+% X' = [S*cos(theta) -S*sin(theta)  tx] * | x | 
+% Y' = [S*sin(theta)  S*cos(theta)  ty]   | y |
+% 1  = [      0             0       1 ]   | 1 |
+%
+% is a special case of the affine tranformation:
+%
+% X' = [M11  M12  M13] * | x | 
+% Y' = [M21  M22  M23]   | y |
+% 1  = [0     0    1 ]   | 1 |
+%
+% One can note here: fitting the affine transform requires 6 measurements
+% and thus 3 points in (x,y) to fully fit, whereas the
+% translation-rotation-scaling only requires 4 measurements and thus only 2
+% points. One can also observe that the generic nature of the affine
+% transform means that, with more degrees of freedom to fit, the affine fit will
+% be better, usually, than the 2D coordinate fitting as long as the number of
+% points is much larger than 3. Similarly, the affine fit may be worse if the
+% number of points is only slightly larger than or equal to 3.
+%
+% Note also: the affine transform does NOT generate a true rotation and
+% thus can add artifacts if this is used to represent true 2-D rotations of
+% coordinate systems, primarily because M11 may not equal M22 and M12 may
+% not equal -M21. In general, if it is known that coordinates are truly
+% orthogonal in both the base and transformed representations, then the 2D
+% coordinate fitting should be used. But, if the transform is not truly a
+% coordinate scaling, rotation, and translation, then the affine fitting
+% method of this function should be used.
+%
+% To solve for the affine matrix in regression form, the above form can be
+% rewritten in regression form as:
+%
+% X  = [x   y   1   0   0   0]  * | M11 |
+% Y  = [0   0   0   x   y   1]    | M12 |
+%                                 | M13 |
+%                                 | M21 |
+%                                 | M22 |
+%                                 | M23 |
+%
+% which is of the linear regressor form: y = X_reg*m assuming y = [X; Y]
+% and X_reg is given by the matrix above, and m = [M11; M12; (etc) M23].
+%
+% This has the solution: m = (X_reg'*X_reg)\(X_reg'*y);
 %
 % FORMAT:
 %
@@ -47,7 +94,7 @@ function [T,err] = ...
 %
 % REVISION HISTORY:
 %
-% 2023_03_23 by Sean Brennan
+% 2023_03_23 to 2023_03_29, by Sean Brennan
 % -- first write of function
 
 
@@ -122,26 +169,7 @@ end
 %
 %See: http://patorjk.com/software/taag/#p=display&f=Big&t=Main
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%§
-% Show that the translation of ortho coordinates from one frame to another
-% is a special case of the affine tranformation
-% X' = [M11  M12  M13] * | x | 
-% Y' = [M21  M22  M23]   | y |
-% 1  = [0     0    1 ]   | 1 |
-% But note here: this affine transform requires 3 points to fully fit,
-% whereas the translation-rotation-scaling only requires 2. 
-%
-% The above form can be rewritten in regression form as:
-% X' = [x   y   1   0   0   0]  * | M11 |
-% Y' = [0   0   0   x   y   1]    | M12 |
-%                                 | M13 |
-%                                 | M21 |
-%                                 | M22 |
-%                                 | M23 |
-%
-% which is of the form y = x*m
-% Which has the solution: m = (x'*x)\(x'*y);
-% 
-fig_num = 8;
+
 
 % Set up problem:
 Npoints = length(coord_base_points(:,1));
@@ -149,9 +177,9 @@ colOfOne = ones(Npoints,1);
 colOfZero = zeros(Npoints,1);
 
 y = [coord_xform_points(:,1); coord_xform_points(:,2)];
-x = [coord_base_points(:,1) coord_base_points(:,2) colOfOne colOfZero                 colOfZero           colOfZero;
+X_reg = [coord_base_points(:,1) coord_base_points(:,2) colOfOne colOfZero                 colOfZero           colOfZero;
      colOfZero               colOfZero            colOfZero coord_base_points(:,1) coord_base_points(:,2) colOfOne];
-m = (x'*x)\(x'*y);
+m = (X_reg'*X_reg)\(X_reg'*y);
 T = [m(1:3)'; m(4:6)'; 0 0 1];
 
 % Compare input points and output points
@@ -159,10 +187,13 @@ T = [m(1:3)'; m(4:6)'; 0 0 1];
 % moved_points = (T_calculated*start_points')';
 
 % Normalize the coord_xform_points
-normalized_coord_xform_points = [coord_xform_points(:,1:2) colOfOne]; % ones(length(coord_xform_points(:,1)),1)];
+normalized_coord_xform_points = [coord_xform_points(:,1:2) colOfOne]; 
+
+% Apply the pseudo-inverse to move points back to their source
 moved_points = (T\normalized_coord_xform_points')';
 
-% Calculate error
+% Calculate error between original base points and the points that are
+% moved back, using vector sum form:
 err = sum((moved_points(:,1:2)-coord_base_points(:,1:2)).^2,2).^0.5; 
 
 

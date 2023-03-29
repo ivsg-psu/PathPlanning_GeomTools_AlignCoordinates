@@ -56,8 +56,7 @@ assert(isequal(T,Ttrue));
 if 1==0
     %% Bad input - wrong number of arguments
     fcn_AlignCoords_generate2DTransformMatrix(24);
-    
-    URHERE
+
     %% Bad input - wrong number of arguments
     fcn_CodeX_generateNumbersLike_KEEP(24,3,4);
     %% Bad input - not integer

@@ -239,6 +239,7 @@ t_calculated = -t_rotated/R_calculated;
 fprintf(1,'Using fcn_AlignCoords_fitRotationKabsch:\n');
 fprintf(1,'Results of fitting rotation matrix, R:\n');
 fprintf(1,'R true: \n');
+R = T(1:2,1:2); % Extract rotation matrix out of the T matrix
 disp(R);
 
 fprintf(1,'R calculated: \n');
@@ -246,6 +247,7 @@ disp(R_calculated);
 
 fprintf(1,'Results of fitting translation vector, t:\n');
 fprintf(1,'t true: \n');
+t = T(1:2,3); % Extract the t vector out of the T matrix
 disp(t);
 fprintf(1,'t calculated: \n');
 disp(t_calculated);
@@ -314,37 +316,25 @@ maxerr_2D = max(err,[],'all');
 %% Generic affine transform 
 % Show that the affine transform works, but it's not a pure rotation
 
+fig_num = 8;
+[T_calculated,err] = fcn_AlignCoords_fitAffineXform(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+sgtitle('Demonstration of fcn_AlignCoords_fitAffineXform', 'Interpreter', 'none','FontSize',12);
+
+
+fprintf(1,'Using fcn_AlignCoords_fit2DCoordinates:\n');
+fprintf(1,'Results of fitting entire transform matrix, T:\n');
+fprintf(1,'T true: \n');
+disp(T);
+fprintf(1,'T calculated: \n');
+disp(T_calculated);
+
+if 1 == 0 % The following assertions should work if the noise above is removed.
+    % Is the error small?
+    assert(max(err,[],'all')<1E-10);    
+end
 
 maxerr_affine = max(err,[],'all');
 
-
-%% Put 2D and affine side-by-side
-fig_num = 9;
-figure(fig_num);
-clf
-hold on
-
-subplot(1,2,1);
-grid on;
-axis equal;
-[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
-title(sprintf('2D xform, max error: %s',num2str(maxerr_2D,6)));
-
-subplot(1,2,2);
-grid on;
-hold on;
-axis equal;
-
-plot(coord_xform_points(:,1),coord_xform_points(:,2),'r.-','LineWidth',3,'MarkerSize',20);
-plot(coord_base_points(:,1),coord_base_points(:,2),'b.-','LineWidth',5,'MarkerSize',30);
-plot(fixed_points(:,1),fixed_points(:,2),'go-','LineWidth',3,'MarkerSize',15);
-
-legend('Moved points','Target points','Moved points, Transformed');
-m = 2;
-Npoints = length(coord_base_points(:,1));
-title(sprintf('Affine xform, max error: %s',num2str(maxerr_affine,6)));
-
-sgtitle('Comparison of 2D and Affine transforms', 'Interpreter', 'none');
 
 
 function fcn_INTERNAL_DebugTools_installDependencies(dependency_name, dependency_subfolders, dependency_url, varargin)
