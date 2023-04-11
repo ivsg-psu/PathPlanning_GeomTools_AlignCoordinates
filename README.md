@@ -79,7 +79,7 @@ This repo supports regression-based methods that align one cartesian coordinate 
 
 <!--[![Product Name Screen Shot][product-screenshot]](https://example.com)-->
 
-Often there is a need to align one coordinate system with another, for example to align an image's coordinates with those of real-world coordinates. This library of codes shows how to regression fit points in one coordinate system that correspond to points in another coordinate system so that one can extract the scaling factor and/or rotation and/or translation, or even the generic affine transform from one coordinate system to another. 
+Often there is a need to align one coordinate system with another, for example to align an image's coordinates with those of real-world coordinates. This library of codes shows how to regression fit points in one coordinate system that correspond to points in another coordinate system so that one can extract the scaling factor and/or rotation and/or translation, or even the generic affine transform from one coordinate system to another.
 
 * Inputs:
   * a set of XY points in N x 2 format in one "base" coordinate system, that correspond row-by-row to points (in N x 2 format) in another "target" coordinate system.
