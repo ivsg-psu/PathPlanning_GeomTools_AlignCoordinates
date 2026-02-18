@@ -20,7 +20,7 @@
 
 % REVISION HISTORY:
 % 
-% 2023_03_27: - sbrennan@psu.edu
+% 2023_03_27 by Sean Brennan, sbrennan@psu.edu
 % - Created a demo script of core debug utilities
 %
 % 2026_02_18 by Sean Brennan, sbrennan@psu.edu
