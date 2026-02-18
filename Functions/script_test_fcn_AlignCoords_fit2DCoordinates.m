@@ -5,7 +5,7 @@
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 close all;
@@ -34,8 +34,8 @@ coord_xform_points = moved_points;
 
 %% Try basic call
 
-fig_num = 1;
-[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+figNum = 1;
+[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum); % Find optimal transform
 
 % Is the error small?
 assert(max(err,[],'all')<1E-10);
@@ -56,8 +56,8 @@ assert(max(t_calculated-T(1:2,3)/S,[],'all')<1E-10, 'translation did not match')
 
 
 %% Test with noisy data
-fig_num = 2;
-figure(fig_num);
+figNum = 2;
+figure(figNum);
 clf;
 
 hold on;
@@ -86,7 +86,7 @@ coord_xform_points = moved_points(:,1:2) + offsets;
 offset_distances = sum(offsets.^2,2).^0.5;
 
 % Calculate the result
-[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+[T_calculated,R_calculated,S_calculated,t_calculated,err] = fcn_AlignCoords_fit2DCoordinates(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum); % Find optimal transform
 
 fprintf(1,'T true: \n');
 disp(T);

@@ -8,7 +8,7 @@ function normalized_start_points = ...
 % FORMAT:
 % 
 %  normalized_start_points = ...
-%    fcn_AlignCoords_fillSamplePoints((type_of_points),(fig_num))
+%    fcn_AlignCoords_fillSamplePoints((type_of_points),(figNum))
 % 
 % INPUTS:
 % 
@@ -23,7 +23,7 @@ function normalized_start_points = ...
 %         4: Random normal
 %         Note: an empty matrix, [], dafaults to 1
 %
-%     fig_num: any number that acts as a figure number output, causing a 
+%     figNum: any number that acts as a figure number output, causing a 
 %     figure to be drawn showing results.
 % 
 % OUTPUTS:
@@ -47,12 +47,12 @@ function normalized_start_points = ...
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
  
 % TO DO:
 % 
-% -- fill in to-do items here.
+% - fill in to-do items here.
 
 %% Debugging and Input checks
 flag_check_inputs = 1; % Set equal to 1 to check the input arguments 
@@ -120,7 +120,7 @@ end
 if 2 == nargin
     temp = varargin{end};
     if ~isempty(temp)
-        fig_num = temp;
+        figNum = temp;
         flag_do_plots = 1;
     end
 else
@@ -224,7 +224,7 @@ normalized_start_points = [start_points ones(length(start_points(:,1)),1)];
 
 if flag_do_plots
     
-    figure(fig_num);
+    figure(figNum);
     hold on
     grid on
     axis square

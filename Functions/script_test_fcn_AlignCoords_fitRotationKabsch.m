@@ -5,7 +5,7 @@
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 close all;
@@ -33,8 +33,8 @@ coord_xform_points = moved_points;
 
 
 %% Try basic call
-fig_num = 1;
-[R_calculated,t_rotated,err] = fcn_AlignCoords_fitRotationKabsch(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+figNum = 1;
+[R_calculated,t_rotated,err] = fcn_AlignCoords_fitRotationKabsch(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum); % Find optimal transform
 
 
 % Calculate unrotated version of t, and in column form. Note: it's in the
@@ -52,8 +52,8 @@ assert(max(t_calculated-T(1:2,3),[],'all')<1E-10,'Translation did not pass asser
 
 
 %% Test across dimensions
-fig_num = 2;
-figure(fig_num);
+figNum = 2;
+figure(figNum);
 clf;
 hold on;
 
@@ -125,8 +125,8 @@ for m = 1:4
 end
 
 %% Test with noisy data
-fig_num = 3;
-figure(fig_num);
+figNum = 3;
+figure(figNum);
 clf;
 
 hold on;

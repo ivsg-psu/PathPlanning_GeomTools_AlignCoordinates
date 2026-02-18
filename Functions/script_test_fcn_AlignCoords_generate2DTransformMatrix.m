@@ -5,7 +5,7 @@
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 close all;
@@ -34,20 +34,20 @@ Ttranslate = [...
     ];
 
 %% Try basic call
-fig_num = 1;
+figNum = 1;
 order_string = 'rts';
 T = fcn_AlignCoords_generate2DTransformMatrix( ...
-    S, theta, tx, ty, order_string, fig_num);
+    S, theta, tx, ty, order_string, figNum);
 
 Trts = Trotate*Ttranslate*Tscale;
 Ttrue = Trts;
 assert(isequal(T,Ttrue));
 
 %% Try another
-fig_num = 2;
+figNum = 2;
 order_string = 'srt';
 T = fcn_AlignCoords_generate2DTransformMatrix( ...
-    S, theta, tx, ty, order_string, fig_num);
+    S, theta, tx, ty, order_string, figNum);
 Tsrt = Tscale*Trotate*Ttranslate;
 Ttrue = Tsrt;
 assert(isequal(T,Ttrue));

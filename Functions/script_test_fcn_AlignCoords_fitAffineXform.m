@@ -5,7 +5,7 @@
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 close all;
@@ -34,8 +34,8 @@ coord_xform_points = moved_points;
 
 %% Try basic call
 
-fig_num = 1;
-[T_calculated,err] = fcn_AlignCoords_fitAffineXform(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+figNum = 1;
+[T_calculated,err] = fcn_AlignCoords_fitAffineXform(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum); % Find optimal transform
 
 % Is the error small?
 assert(max(err,[],'all')<1E-10);
@@ -53,8 +53,8 @@ fprintf(1,'Note: the fit is very good as the errors are very small, with maximum
 
 
 %% Test with noisy data
-fig_num = 2;
-figure(fig_num);
+figNum = 2;
+figure(figNum);
 clf;
 hold on;
 
@@ -65,7 +65,7 @@ coord_xform_points = moved_points(:,1:2) + offsets;
 offset_distances = sum(offsets.^2,2).^0.5;
 
 % Calculate the result
-[T_calculated,err] = fcn_AlignCoords_fitAffineXform(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num); % Find optimal transform
+[T_calculated,err] = fcn_AlignCoords_fitAffineXform(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum); % Find optimal transform
 
 fprintf(1,'Now, here is the affine result with some noise: \n');
 fprintf(1,'This is T used to perform coordinate rotations:\n');

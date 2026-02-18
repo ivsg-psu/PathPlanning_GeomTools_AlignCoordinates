@@ -5,7 +5,7 @@
 % REVISION HISTORY:
 % 
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 close all;
@@ -33,8 +33,8 @@ coord_xform_points = moved_points;
 
 
 %% Try basic call
-fig_num = 1;
-S_calculated = fcn_AlignCoords_regressionFitScaleFactor(coord_base_points(:,1:2), coord_xform_points(:,1:2), fig_num);
+figNum = 1;
+S_calculated = fcn_AlignCoords_regressionFitScaleFactor(coord_base_points(:,1:2), coord_xform_points(:,1:2), figNum);
 assert(abs(S-S_calculated)<1E-10);
 
 

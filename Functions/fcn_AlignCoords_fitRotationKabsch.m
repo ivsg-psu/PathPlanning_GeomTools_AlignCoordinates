@@ -8,7 +8,7 @@ function [R,t,err] = ...
 %
 %  [R, t, err] = ...
 %    fcn_AlignCoords_fitRotationKabsch( ...
-%    coord_base_points, coord_xform_points, fig_num))
+%    coord_base_points, coord_xform_points, figNum))
 %
 % INPUTS:
 %
@@ -23,7 +23,7 @@ function [R,t,err] = ...
 %
 %     (optional inputs)
 %
-%     fig_num: any number that acts as a figure number output, causing a
+%     figNum: any number that acts as a figure number output, causing a
 %     figure to be drawn showing results.
 %
 % OUTPUTS:
@@ -49,7 +49,7 @@ function [R,t,err] = ...
 % NOTE: this is just a wrapped version of: rigidtform
 % https://www.mathworks.com/matlabcentral/fileexchange/61697-rigidtform
 % Andrew Horchler (2023). rigidtform (https://github.com/horchler/rigidtform), GitHub. Retrieved March 25, 2023.
-% --------
+% *********
 %
 % Andrew D. Horchler, *horchler @ gmail . com*,
 % [biorobots.case.edu](http://biorobots.case.edu/) Created: 12-8-16,
@@ -59,7 +59,7 @@ function [R,t,err] = ...
 % (Build: 16D32), Java 1.7.0_75-b13 Compatibility maintained back through
 % Matlab 8.3 (R2014a) &nbsp;
 %
-% --------
+% *********
 %
 % Copyright &copy; 2016&ndash;2017, Andrew D. Horchler All rights reserved.
 %
@@ -96,12 +96,12 @@ function [R,t,err] = ...
 % REVISION HISTORY:
 %
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 % TO DO:
 %
-% -- fill in to-do items here.
+% - fill in to-do items here.
 
 %% Debugging and Input checks
 flag_check_inputs = 1; % Set equal to 1 to check the input arguments
@@ -148,7 +148,7 @@ end
 if 3 == nargin
     temp = varargin{end};
     if ~isempty(temp)
-        fig_num = temp;
+        figNum = temp;
         flag_do_plots = 1;
     end
 else
@@ -214,7 +214,7 @@ if flag_do_plots
 
         
         
-        figure(fig_num);
+        figure(figNum);
         clf;
         hold on
                

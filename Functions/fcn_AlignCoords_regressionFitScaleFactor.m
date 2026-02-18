@@ -9,7 +9,7 @@ function S = ...
 %
 %  S = ...
 %    fcn_AlignCoords_regressionFitScaleFactor( ...
-%    coord_base_points, coord_xform_points, (fig_num))
+%    coord_base_points, coord_xform_points, (figNum))
 %
 % INPUTS:
 %
@@ -22,7 +22,7 @@ function S = ...
 %
 %     (optional inputs)
 %
-%     fig_num: any number that acts as a figure number output, causing a
+%     figNum: any number that acts as a figure number output, causing a
 %     figure to be drawn showing results.
 %
 % OUTPUTS:
@@ -45,12 +45,12 @@ function S = ...
 % REVISION HISTORY:
 %
 % 2023_03_23 by Sean Brennan
-% -- first write of function
+% - first write of function
 
 
 % TO DO:
 %
-% -- fill in to-do items here.
+% - fill in to-do items here.
 
 %% Debugging and Input checks
 flag_check_inputs = 1; % Set equal to 1 to check the input arguments
@@ -98,7 +98,7 @@ end
 if 3 == nargin
     temp = varargin{end};
     if ~isempty(temp)
-        fig_num = temp;
+        figNum = temp;
         flag_do_plots = 1;
     end
 else
@@ -163,7 +163,7 @@ if flag_do_plots
 
     fprintf(1,'Scale is: %.2f\n',S);
 
-    figure(fig_num);
+    figure(figNum);
     clf;
     hold on
     

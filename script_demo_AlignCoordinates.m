@@ -1,9 +1,11 @@
-
 %% Introduction to and Purpose of the Code
 % This is the explanation of the code that can be found by running
-%       script_demo_AlignCoordinates.m
+%       
+%    script_demo_AlignCoordinates.m
+% 
 % This is a script to demonstrate the functions within the AlignCoordinates
 % code library. This code repo is typically located at:
+% 
 %   https://github.com/ivsg-psu/PathPlanning_GeomTools_AlignCoordinates
 %
 % If you have questions or comments, please contact Sean Brennan at
@@ -16,126 +18,155 @@
 
 
 
-%% Revision History:
-%      2023_03_27: - sbrennan@psu.edu
-%      -- created a demo script of core debug utilities
-
-
-%% Prep workspace
-clc % Clear the console
-close all % Close all figures
-
-%% Dependencies and Setup of the Code
-% The code requires several other libraries to work, namely the following
-%%
+% REVISION HISTORY:
 % 
-% * DebugTools - the repo can be found at: https://github.com/ivsg-psu/Errata_Tutorials_DebugTools
-% * PathClassLibrary - the repo can be found at: https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary
-% 
-% Each is automatically installed in a folder called "Utilities" under the
-% root folder, for example:
-%  ./Utilities/DebugTools/ ,
-%  ./Utilities/PathClassLibrary/ .
-% 
-% For ease of transfer, zip files of the directories used - without the
-% .git repo information, to keep them small - are referenced and are NOT
-% included in this repo. These dependencies are to open code repos, and
-% this code accesses these and downloads, if needed, the appropriate
-% releases.
+% 2023_03_27: - sbrennan@psu.edu
+% - Created a demo script of core debug utilities
+%
+% 2026_02_18 by Sean Brennan, sbrennan@psu.edu
+% - In script_demo_AlignCoordinates
+%   % * Updated headers to current standard
+%   % * Added auto-installer
+%
+% (new release)
+
+% TO-DO:
+% - 2026_02_18 by Sean Brennan, sbrennan@psu.edu
+%   * Need to update all functions and scripts to standard form
 
 
+%% Make sure we are running out of root directory
+st = dbstack; 
+thisFile = which(st(1).file);
+[filepath,name,ext] = fileparts(thisFile);
+cd(filepath);
 
-% USE THE FOLLOWING CODE TO ALLOW MANUAL INSTALLS OF LIBRARIES (IF PRIVATE)
-% 
-% The following code checks to see if the folders flag has been
-% initialized, and if not, it calls the DebugTools function that loads the
-% path variables. It then loads the PathClassLibrary functions as well.
-% Note that the PathClass Library also has sub-utilities that are included.
+%%% START OF STANDARD INSTALLER CODE %%%%%%%%%
 
-% if ~exist('flag_AlignCoords_Folders_Initialized','var')
-%     
-%     % add necessary directories for function creation utility 
-%     %(special case because folders not added yet)
-%     debug_utility_folder = fullfile(pwd, 'Utilities', 'DebugTools');
-%     debug_utility_function_folder = fullfile(pwd, 'Utilities', 'DebugTools','Functions');
-%     debug_utility_folder_inclusion_script = fullfile(pwd, 'Utilities', 'DebugTools','Functions','fcn_DebugTools_addSubdirectoriesToPath.m');
-%     if(exist(debug_utility_folder_inclusion_script,'file'))
-%         current_location = pwd;
-%         cd(debug_utility_function_folder);
-%         fcn_DebugTools_addSubdirectoriesToPath(debug_utility_folder,{'Functions','Data'});
-%         cd(current_location);
-%     else % Throw an error?
-%         error('The necessary utilities are not found. Please add them (see README.md) and run again.');
-%     end
-%     
-%     % Now can add the Path Class Library automatically
-%     utility_folder_PathClassLibrary = fullfile(pwd, 'Utilities', 'PathClassLibrary');
-%     fcn_DebugTools_addSubdirectoriesToPath(utility_folder_PathClassLibrary,{'Functions','Utilities'});
-%     
-%     % utility_folder_GetUserInputPath = fullfile(pwd, 'Utilities', 'GetUserInputPath');
-%     % fcn_DebugTools_addSubdirectoriesToPath(utility_folder_GetUserInputPath,{'Functions','Utilities'});
-% 
-%     % Now can add all the other utilities automatically
-%     folder_LapsClassLibrary = fullfile(pwd);
-%     fcn_DebugTools_addSubdirectoriesToPath(folder_LapsClassLibrary,{'Functions'});
-% 
-%     % set a flag so we do not have to do this again
-%     flag_AlignCoords_Folders_Initialized = 1;
-% end
-
-% Use the following code to install public libraries
-
-% List what libraries we need, and where to find the codes for each
-clear library_name library_folders library_url
-
-ith_library = 1;
-library_name{ith_library}    = 'DebugTools_v2023_01_29';
-library_folders{ith_library} = {'Functions','Data'};
-library_url{ith_library}     = 'https://github.com/ivsg-psu/Errata_Tutorials_DebugTools/blob/main/Releases/DebugTools_v2023_01_29.zip?raw=true';
-
-% ith_library = ith_library+1;
-% library_name{ith_library}    = 'PathClass_v2023_02_01';
-% library_folders{ith_library} = {'Functions'};                                
-% library_url{ith_library}     = 'https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary/blob/main/Releases/PathClass_v2023_02_01.zip?raw=true';
-% 
-% ith_library = ith_library+1;
-% library_name{ith_library}    = 'GetUserInputPath_v2023_02_01';
-% library_folders{ith_library} = {''};
-% library_url{ith_library}     = 'https://github.com/ivsg-psu/PathPlanning_PathTools_GetUserInputPath/blob/main/Releases/GetUserInputPath_v2023_02_01.zip?raw=true';
-
-% Do we need to set up the work space?
-if ~exist('flag_AlignCoords_Folders_Initialized','var')
-
-    % Reset all flags for installs to empty
-    clear global FLAG*
-
-    fprintf(1,'Installing utilities necessary for code ...\n');
-
-    % Dependencies and Setup of the Code
-    % This code depends on several other libraries of codes that contain
-    % commonly used functions. We check to see if these libraries are installed
-    % into our "Utilities" folder, and if not, we install them and then set a
-    % flag to not install them again.
-    
-    % Set up libraries
-    for ith_library = 1:length(library_name)
-        dependency_name = library_name{ith_library};
-        dependency_subfolders = library_folders{ith_library};
-        dependency_url = library_url{ith_library};
-
-        fprintf(1,'\tAdding library: %s ...',dependency_name);
-        fcn_INTERNAL_DebugTools_installDependencies(dependency_name, dependency_subfolders, dependency_url);
-        clear dependency_name dependency_subfolders dependency_url
-        fprintf(1,'Done.\n');
-    end
-
-    % Set dependencies for this project specifically
-    fcn_DebugTools_addSubdirectoriesToPath(pwd,{'Functions','Data'});
-    
-    disp('Done setting up libraries, adding each to MATLAB path, and adding current repo folders to path.');
-    
+%% Clear paths and folders, if needed
+if 1==1
+    clear flag_AlignCoordinates_Folders_Initialized
 end
 
+if 1==0
+    fcn_INTERNAL_clearUtilitiesFromPathAndFolders;
+end
+
+if 1==0
+    % Resets all paths to factory default
+    restoredefaultpath;
+end
+
+%% Install dependencies
+% Define a universal resource locator (URL) pointing to the repos of
+% dependencies to install. Note that DebugTools is always installed
+% automatically, first, even if not listed:
+clear dependencyURLs dependencySubfolders
+ith_repo = 0;
+
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_PathClassLibrary';
+% dependencySubfolders{ith_repo} = {'Functions','Data'};
+ 
+ith_repo = ith_repo+1;
+dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_PathTools_GetUserInputPath';
+dependencySubfolders{ith_repo} = {''};
+
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_GeomTools_AlignCoordinates';
+% dependencySubfolders{ith_repo} = {'Functions'};
+% 
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/FieldDataCollection_GPSRelatedCodes_GPSClass';
+% dependencySubfolders{ith_repo} = {'Functions'};
+
+
+
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/FieldDataCollection_VisualizingFieldData_PlotRoad';
+% dependencySubfolders{ith_repo} = {'Functions','Data'};
+
+
+% ith_repo = ith_repo+1;
+% dependencyURLs{ith_repo} = 'https://github.com/ivsg-psu/PathPlanning_MapTools_MapGenClassLibrary';
+% dependencySubfolders{ith_repo} = {'Functions','testFixtures','GridMapGen'};
+
+
+
+%% Do we need to set up the work space?
+if ~exist('flag_AlignCoordinates_Folders_Initialized','var')
+    
+    % Clear prior global variable flags
+    clear global FLAG_*
+
+    % Navigate to the Installer directory
+    currentFolder = pwd;
+    cd('Installer');
+    % Create a function handle
+    func_handle = @fcn_DebugTools_autoInstallRepos;
+
+    % Return to the original directory
+    cd(currentFolder);
+
+    % Call the function to do the install
+    func_handle(dependencyURLs, dependencySubfolders, (0), (-1));
+
+    % Add this function's folders to the path
+    this_project_folders = {...
+        'Functions','Data'};
+    fcn_DebugTools_addSubdirectoriesToPath(pwd,this_project_folders)
+
+    flag_AlignCoordinates_Folders_Initialized = 1;
+end
+
+%%% END OF STANDARD INSTALLER CODE %%%%%%%%%
+
+%% Set environment flags for input checking in library
+% These are values to set if we want to check inputs or do debugging
+setenv('MATLABFLAG_ALIGNCOORDINATES_FLAG_CHECK_INPUTS','1');
+setenv('MATLABFLAG_ALIGNCOORDINATES_FLAG_DO_DEBUG','0');
+
+%% Set environment flags that define the ENU origin
+% This sets the "center" of the ENU coordinate system for all plotting
+% functions
+% Location for Test Track base station
+setenv('MATLABFLAG_PLOTROAD_REFERENCE_LATITUDE','40.86368573');
+setenv('MATLABFLAG_PLOTROAD_REFERENCE_LONGITUDE','-77.83592832');
+setenv('MATLABFLAG_PLOTROAD_REFERENCE_ALTITUDE','344.189');
+
+
+%% Set environment flags for plotting
+% These are values to set if we are forcing image alignment via Lat and Lon
+% shifting, when doing geoplot. This is added because the geoplot images
+% are very, very slightly off at the test track, which is confusing when
+% plotting data
+setenv('MATLABFLAG_PLOTROAD_ALIGNMATLABLLAPLOTTINGIMAGES_LAT','-0.0000008');
+setenv('MATLABFLAG_PLOTROAD_ALIGNMATLABLLAPLOTTINGIMAGES_LON','0.0000054');
+
+%% Check repo compliance?
+if 1==0
+	% Set input arguments
+	repoShortName = '_AlignCoordinates_';
+
+	% Call the function
+	fcn_DebugTools_testRepoForRelease(repoShortName, (2222));
+end
+
+%% Start of Demo Code
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   _____ _             _            __   _____                          _____          _
+%  / ____| |           | |          / _| |  __ \                        / ____|        | |
+% | (___ | |_ __ _ _ __| |_    ___ | |_  | |  | | ___ _ __ ___   ___   | |     ___   __| | ___
+%  \___ \| __/ _` | '__| __|  / _ \|  _| | |  | |/ _ \ '_ ` _ \ / _ \  | |    / _ \ / _` |/ _ \
+%  ____) | || (_| | |  | |_  | (_) | |   | |__| |  __/ | | | | | (_) | | |___| (_) | (_| |  __/
+% |_____/ \__\__,_|_|   \__|  \___/|_|   |_____/ \___|_| |_| |_|\___/   \_____\___/ \__,_|\___|
+%
+%
+% See: http://patorjk.com/software/taag/#p=display&f=Big&t=Start%20of%20Demo%20Code
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+disp('Welcome to the demo code for the AlignCoordinates library!')
 
 % We choose homogenous coordinates of the form below which includes:
 % translation via (tx, ty), rotation by angle (q), and uniform scaling of
@@ -172,7 +203,7 @@ clf;
 
 for type_of_points = 1:4
     subplot(2,2,type_of_points);
-    start_points = fcn_AlignCoords_fillSamplePoints(type_of_points, fig_num);
+    start_points = fcn_AlignCoords_fillSamplePoints(type_of_points, fig_num); %#ok<NASGU>
 end
 sgtitle('Demonstration of fcn_AlignCoords_generate2DTransformMatrix', 'Interpreter', 'none','FontSize',12);
 
